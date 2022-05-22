@@ -1,0 +1,453 @@
+<html>
+	<head>
+    <style>
+            table, tr, td {
+                border: 1px solid black;
+                text-align: center;
+                border-collapse: collapse;
+            }
+            .headerCell{background-color: rgb(238, 218, 222);}
+
+
+    </style>
+		<title>Loci Number</title>
+		
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+        <!-- load the jquery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+        <!--Load the google charts library-->
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+            //create histogram
+            google.charts.load("current", {packages:["corechart"]});
+            google.charts.setOnLoadCallback(drawChart);
+            function drawHistogram(data){
+                var data = new google.visualization.DataTable();
+                data.addColumn("string", "RBP");
+                data.addColumn("number", "count");
+                data.addRows(
+                    data                 
+                )
+                var options = {
+                    title: 'Histogram of xxxx',
+                    legend: { position: 'none' },
+                };
+                var chart = new google.visualization.Histogram(document.getElementById('plot_div'));
+                chart.draw(data, options);
+            }
+        </script>
+
+        <!--table-->
+        <script>
+            google.charts.load('current', {packages:['table']});
+            google.charts.setOnLoadCallback(drawTable);        
+            function drawTable(da) {
+                var data = new google.visualization.DataTable();
+                data.addColumn("number", "SNP Chromosome");
+                data.addColumn("number", "SNP Position");
+                data.addColumn("string", "SNP Marker Name");
+                data.addColumn("number", "p-value for SNP");
+                data.addColumn("string", "Target Gene");
+                
+                for (i = 0; i<da.length; i++){
+                    let target_gene = da[i][4]
+                    data.addRow([da[i][0],da[i][1],da[i][2],da[i][3],`<a href="https://www.ncbi.nlm.nih.gov/gene/?term=${target_gene}" target = "_blank">${target_gene}</a>`]);
+                }
+                var options = { 
+                    allowHtml: true, 
+                    showRowNumber: true, 
+                    width: '100%', 
+                    height: '300',
+
+                    cssClassNames: { 
+                    headerRow: 'headerRow',
+                    tableRow: 'tableRow',
+                    oddTableRow: 'oddTableRow',
+                    selectedTableRow: 'selectedTableRow',
+                    headerCell: 'headerCell',
+                    tableCell: 'tableCell',
+                    rowNumberCell: 'rowNumberCell'}
+                };
+                var table = new google.visualization.Table(document.getElementById('result_div'));
+                table.draw(data,options);
+                // download stuff
+                if (data.length != 0){
+                    $("#result_div").append('<br><br><button id="download_button" type="button" style="float: right;">Download table</button>')
+                    $("#result_div").append('<br><br><br><br><br><br><br><br>')
+
+                }
+                // data without hyperlink
+                var data = new google.visualization.DataTable();
+                    data.addColumn("number", "SNP Chromosome");
+                    data.addColumn("number", "SNP Position");
+                    data.addColumn("string", "SNP Marker Name");
+                    data.addColumn("number", "p-value for SNP");
+                    data.addColumn("string", "Target Gene");
+
+                    for (i = 0; i<da.length; i++){
+                        data.addRow([da[i][0],da[i][1],da[i][2],da[i][3],da[i][4]]);}
+                //  download button
+                $("#download_button").click(function(){    
+                    var csvColumns;
+                    var csvContent;
+                    var downloadLink;
+                    // build column headings
+                    csvColumns = '';
+                    for (var i = 0; i < data.getNumberOfColumns(); i++) {
+                    csvColumns += data.getColumnLabel(i);
+                    if (i < (data.getNumberOfColumns() - 1)) {
+                        csvColumns += ',';
+                    }
+                    }
+                    csvColumns += '\n';
+
+                    // get data rows
+                    csvContent = csvColumns + google.visualization.dataTableToCsv(data);
+
+                    downloadLink = document.createElement('a');
+                    downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent);
+                    downloadLink.download = 'loci_number.csv';
+                    downloadLink.click();
+                    downloadLink = null;
+                    });}
+        </script>
+
+        <!--Load the chrome charts library, https://github.com/eweitz/ideogram-->
+        <script src="https://cdn.jsdelivr.net/npm/ideogram@1.36.0/dist/js/ideogram.min.js"></script>
+        <!--Load json library-->
+        <script src="https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.js"></script>
+    
+    </head>
+
+	<body>
+        <!---------------------Title and banner for every page---------------------->
+        <!--image and title-->
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white; ">
+                <div class="bu_logo">
+                    <a><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Boston_University_wordmark.svg/1200px-Boston_University_wordmark.svg.png" width="100px">
+                    </a>
+                </div>
+                <h1 style ='font-size: 25px;'>&emsp;SNP-RNA Protein Interactions for Alzheimer’s Disease and Related Dementia</h1>
+            </nav>	
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>
+                </div>
+            </div>
+        </header>
+
+        <!--banner-->
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white; ">
+            <div class="collapse navbar-collapse navbar-center" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <!--home page-->
+                    <li class="nav-item active">
+                        <a href="https://bioed.bu.edu/students_22/Group_B/homepage.html" class="nav-link" style = 'color: #DCDCDC; font-size: 15px;'> <span> Home </span>
+                            <span class="sr-only">(current)</span> 
+                        </a>
+                    </li>
+                    <!-- AD-related SNP-RBP binding -->
+                    <li class="nav-item active">
+                        <a href="https://bioed.bu.edu/students_22/Group_B/AD_related.html" class="nav-link" style = 'color: #DCDCDC; font-size: 15px;'> <span> AD-related SNP-RBP binding </span>
+                            <span class="sr-only">(current)</span> 
+                        </a>
+                    </li>
+                    <!-- Loci Number -->
+                    <li class="nav-item active">
+                        <a href="https://bioed.bu.edu/students_22/Group_B/Loci_number.html" class="nav-link" style = 'font-size: 15px;'> <span> Loci Number </span>
+                            <span class="sr-only">(current)</span> 
+                        </a>
+                    </li>
+                    <!-- AD-related RBP function -->
+                    <li class="nav-item active">
+                        <a href="https://bioed.bu.edu/students_22/Group_B/RBP_function.html" class="nav-link" style = 'color: #DCDCDC; font-size: 15px;'> <span> AD-related RBP function </span>
+                            <span class="sr-only">(current)</span> 
+                        </a>
+                    </li>
+                    <!-- Help -->
+                    <li class="nav-item active">
+                        <a href= "https://bioed.bu.edu/students_22/Group_B/help.html" class="nav-link" style = 'color: #DCDCDC; font-size: 15px;'> <span> Help </span>
+                            <span class="sr-only">(current)</span> 
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!-- line begin-->
+        <div class="row">
+            <div class="col-md-12">
+                <hr>
+            </div>
+        </div>
+        <!--line end-->
+        <!--banner end-->
+        <!---------------------Title and banner for every page---------------------->
+        
+        <!---------------------------main area Begin ------------------------->
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <!--main code strat-->
+                    <div class="col-md-8">
+                        <div class="RBP_name">
+                            <tr><td style="width:750px;"><font size=4><b>Number of loci on each specific RBP and the function of each loci</font></b></td>
+                            </tr><br><br>    
+                            <tr><td>&nbsp;&nbsp;&nbsp;Input RBP name (e.g. BUD13): <input type="text" id="rbpname" size="10">
+                            </td></tr>
+                            <tr><td>
+                                <div align="right">
+                                    <button id="submit_button">Submit</button>
+                                </div>
+                            </td></tr>
+                            <tr><td><hr></td>
+                            </tr>
+                        </div>    
+                        <!-- if form start (shows up only after submission)-->
+                        <div class="container">
+                            <div class="row">
+                                <!--description subpage-->
+                                <div class="col-sm">
+                                    <button id="description_button" type="button" class="mqc_table_copy_btn btn btn-default btn-sm" data-clipboard-target="#general_stats_table">
+                                        <span class="glyphicon glyphicon-copy""></span> Description
+                                    </button>
+                                </div>
+
+                                <!--Table subpage-->
+                                <div class="col-sm">
+                                    <button id="table_button" type="button" class="mqc_table_copy_btn btn btn-default btn-sm" data-clipboard-target="#general_stats_table">
+                                        <span class="glyphicon glyphicon-copy"></span> Table
+                                    </button>
+                                </div>
+
+                                <!--Plot subpage-->
+                                <div class="col-sm">
+                                    <button id="plot_button" type="button" class="mqc_table_copy_btn btn btn-default btn-sm" data-clipboard-target="#general_stats_table">
+                                        <span class="glyphicon glyphicon-copy"></span> Plot
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- if form end -->
+                    </div>
+                    <!--main code end-->
+                    <div class="col-md-2"></div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+        <!--result area-->
+        <div class='row'>
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8">
+                        <div class="results">
+                            <div class="row">
+<!---------------------Loader for every page---------------------->
+                                <div class="loader-wrapper">
+                                    <br><br>
+                                    <span class="loader">
+                                            <img id = 'loading' src = 'https://www.cazo.ae/assets/images/loading.gif' style="display:none; position:relative; left:30%;">
+                                        <span class="loader-inner"></span>
+                                    </span>                            
+                                </div>
+<!---------------------Loader for every page---------------------->
+
+                                <div id="result_div"></div>
+                                <br><br><br>
+                            </div> 
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+            </div>
+        <!---------------------------main area End ------------------------->
+
+         <!----------------------------Java Script Begin--------------------------->
+        <script>
+            $(document).ready(function(){
+                $("#submit_button").click(function(){  
+                    get_data();   
+                    document.getElementById('loading').style.display='block';
+                    setTimeout(function(){
+                        description_result(data_loci); 
+                    },1000)
+                    setTimeout(function(){
+                        document.getElementById('loading').style.display='none';
+                    },1001)
+                    //alert(data.loci)                                
+                });
+
+                $("#description_button").click(function(){  
+                    description_result(data_loci);                                  
+                });
+
+                $("#table_button").click(function(){   
+                    snp_data(data_loci);                                                         
+                });
+
+                $("#plot_button").click(function(){
+                    plot_result(data_loci);                                                       
+                });
+
+                //-----description page
+                function get_data(){ 
+                    let rbpname = $("#rbpname").val();         
+                    $.get("https://bioed.bu.edu/cgi-bin/students_22/Group_B/finalProject.py",
+                        {selector: "loci_table", rbpname:rbpname},
+                        function(data){
+                            window.data_loci=data;
+                            description_result(data_loci);
+                        },
+                        "json"
+                    );         
+                };      
+                function description_result(data){
+                    // tab indicator
+                    var el = document.getElementById('description_button');
+                    el.setAttribute('style', ' color: black;');
+                    var el = document.getElementById('table_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+                    var el = document.getElementById('plot_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+
+                    if(data.length !=0){
+                        //creating the box
+                        var el = document.getElementById('result_div');
+                        el.setAttribute('style', 'border: 1px solid #000; display: inline-block; position: fixed; left: 350px; width: 38vw; height: 13vw; text-align: center;');
+                        //clear any existing html in the ppiTable div
+                        $("#result_div").empty();
+                        //summary result
+                        var tar_gene=[];
+                        let num=0;
+                        for (let i=0;i<data.length;i++){
+                            if (tar_gene.indexOf(data[i][4])==-1){
+                                tar_gene.push(data[i][4]);
+                                num++;
+                            }
+                        }
+                        $("#result_div").append("<br><h5>Summary</h5><br>"); 
+                        $("#result_div").append("<p>The number of SNP: "+data.length+"</p>");
+                        $("#result_div").append("<p>The number of targeted genes: "+num+"</p>");
+                    }
+                    else{
+                        setTimeout(function(){
+                        //clear any existing html in the ppiTable div
+                        var el = document.getElementById('result_div');
+                        el.setAttribute('style', 'position: fixed; left: 350px; text-align:center');
+                        $("#result_div").empty();
+                        //append the error message
+                        $("#result_div").append("<br><br><h3>There is no data </h3>");
+                    },1000)}
+                };
+    
+                function table_result(data){
+                    // tab indicator
+                    var el = document.getElementById('description_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+                    var el = document.getElementById('table_button');
+                    el.setAttribute('style', ' color: black;');
+                    var el = document.getElementById('plot_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+
+
+                    //creating the box
+                    var el = document.getElementById('result_div');
+                    el.setAttribute('style', 'position: fixed; left: 350px; text-align:center');
+                    
+                    if(data.length !=0){
+                        //clear any existing html in the resultdiv
+                        $("#result_div").empty();
+                        // $("#result_div").append("<br>");
+                        drawTable(data);  
+                    }
+                    else{
+                        //clear any existing html in the result div
+                        $("#result_div").empty();
+                        //append the error message
+                        $("#result_div").append("<br><br><h3>There is no data </h3>");
+                    }
+                };
+
+                function snp_data(data){
+                  // organize data - change into string
+                  var processed = [];
+                    for (i = 0; i<data.length; i++){
+                        tmp = [];
+                        tmp.push(data[i][0]);
+                        tmp.push(data[i][1]);
+                        tmp.push(String(data[i][2])); //s
+                        tmp.push(data[i][3]);
+                        tmp.push(String(data[i][4]));
+                        processed.push(tmp);
+                    };
+                    table_result(processed);   
+                };    
+                  
+                //----plot page
+                function plot_result(data){
+                    // tab indicator
+                    var el = document.getElementById('description_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+                    var el = document.getElementById('table_button');
+                    el.setAttribute('style', ' color: #DCDCDC;');
+                    var el = document.getElementById('plot_button');
+                    el.setAttribute('style', ' color: black;');
+
+                    var el = document.getElementById('result_div');
+                    el.setAttribute('style', 'position: relative; left: 12%; text-align:center');
+                    
+                    //creating the box
+                    $("#result_div").empty(); 
+                    if(data.length !=0){
+                        if (data.length>40) len=40
+                            else len=data.length  
+                        var snps=new Array(len);
+                        for (let i=0;i<len;i++){
+                            let snp={name: data[i][4].substring(0,data[i][4].length-1),
+                                     chr: String(data[i][0]),
+                                     start: data[i][1],
+                                     stop: data[i][1]+1
+                                    };
+                            //let json = JSON.stringify(snp);
+                            //unquoted = json.replace(/"([^"]+)":/g, '$1:');
+                            //alert(JSON.stringify(snp).replace(/"(\w+)"\s*:/g, '$1:'));
+                            snps[i]=snp;
+                        }
+                        //alert(JSON.stringify(snps))
+                        config={
+                            container:'#result_div',
+                            organism: 'human',
+                            chrHeight: 475,
+                            //annotationsLayout: 'histogram',
+                            annotations: snps//.replace(/\/$/, "")
+                        }
+                        //alert(JSON.stringify(config))
+                        var ideogram = new Ideogram(config);
+                        $("#result_div").append('<h5>Location of SNPs on Human Chromosomes<h5>')
+                        $("#result_div").append('<p>(Scroll right & click on specific chromosome for more details)<p>')
+                    }
+                    else{
+                        //clear any existing html in the ppiTable div
+                        $("#result_div").empty();
+                        //append the error message
+                        $("#result_div").append("<br><br><h3>There is no data </h3>");
+                    }    
+                };                                         
+            });    
+        </script>
+        <!----------------------------Java Script End  --------------------------->
+	</body>
+</html>
